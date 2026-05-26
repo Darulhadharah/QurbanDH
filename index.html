@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Portal Shahibul Qurban · siQurban</title>
+  <title>Portal Shahibul Qurban · DarulHadharah</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* ══════════════════════════════════════
@@ -999,15 +999,6 @@
       </div>
 
       <!-- FOOTER -->
-      <div class="footer">
-        <strong>Portal Shahibul Qurban · siQurban</strong>
-        <div class="ornamen-bot"></div>
-        <div class="footer-dua">
-          <div class="footer-arab">&#x631;&#x628;&#x651;&#x646;&#x627; &#x62A;&#x642;&#x628;&#x651;&#x644;&#x652; &#x645;&#x650;&#x646;&#x651;&#x627;</div>
-          <div class="footer-trans">Semoga Allah terima Ibadah Qurban ini</div>
-        </div>
-      </div>
-
       <!-- ═══ AKSI BAWAH: Folder Foto + Cetak ═══ -->
       <div class="aksi-bawah no-print">
 
@@ -1043,6 +1034,16 @@
           <span class="btn-cetak-spinner">⏳ Menyiapkan PDF...</span>
         </button>
 
+      </div>
+
+      <!-- Footer + Kartu Doa — paling bawah -->
+      <div class="footer">
+        <strong>Portal Shahibul Qurban · DarulHadharah</strong>
+        <div class="ornamen-bot"></div>
+        <div class="footer-dua">
+          <div class="footer-arab">&#x631;&#x628;&#x651;&#x646;&#x627; &#x62A;&#x642;&#x628;&#x651;&#x644;&#x652; &#x645;&#x650;&#x646;&#x651;&#x627;</div>
+          <div class="footer-trans">Semoga Allah terima Ibadah Qurban ini</div>
+        </div>
       </div>
 
     </div>
@@ -1359,7 +1360,7 @@
           (logoSrc ? '<img src="' + logoSrc + '" alt="Logo">' : '') +
           '<div class="print-header-teks">' +
             '<div class="t1">Laporan Qurban — ' + namaSQ + '</div>' +
-            '<div class="t2">Portal Shahibul Qurban · siQurban · Dicetak ' + new Date().toLocaleDateString('id-ID', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) + '</div>' +
+            '<div class="t2">Portal Shahibul Qurban · DarulHadharah · Dicetak ' + new Date().toLocaleDateString('id-ID', {weekday:'long',year:'numeric',month:'long',day:'numeric'}) + '</div>' +
           '</div>';
         document.querySelector('.main').prepend(ph);
       }
@@ -1421,7 +1422,7 @@
         const pf = document.createElement('div');
         pf.id = 'print-footer';
         pf.className = 'print-footer only-print';
-        pf.innerHTML = 'Portal Shahibul Qurban · siQurban &nbsp;|&nbsp; Semoga Allah terima ibadah Qurban ini &nbsp;|&nbsp; رَبَّنَا تَقَبَّلْ مِنَّا';
+        pf.innerHTML = 'Portal Shahibul Qurban · DarulHadharah &nbsp;|&nbsp; Semoga Allah terima ibadah Qurban ini &nbsp;|&nbsp; رَبَّنَا تَقَبَّلْ مِنَّا';
         document.querySelector('.main').appendChild(pf);
       }
 
