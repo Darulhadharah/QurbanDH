@@ -807,24 +807,37 @@
     .btn-cetak.loading .btn-cetak-spinner { display: flex; align-items: center; gap: 6px; }
     .btn-cetak-spinner { display: none; }
 
-    /* Progress bar download */
-    .download-progress {
-      background: #f1f5f9; border-radius: 10px;
-      overflow: hidden; height: 6px; margin-top: 4px;
-      display: none;
+    /* Download folder buttons */
+    .aksi-dl-label {
+      font-size: 11px; font-weight: 700; color: var(--abu);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 2px 0;
     }
-    .download-progress.tampil { display: block; }
-    .download-progress-bar {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, #2563eb, #60a5fa);
-      border-radius: 10px;
-      transition: width 0.3s ease;
+    .aksi-dl-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
-    .download-info {
-      font-size: 11px; color: var(--abu); text-align: center;
-      display: none; margin-top: 4px;
+    .btn-folder-khusus {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+      padding: 13px 10px !important;
+      font-size: 13px !important;
     }
-    .download-info.tampil { display: block; }
+    .btn-folder-khusus:hover { box-shadow: 0 7px 20px rgba(37,99,235,.45); }
+    .btn-folder-umum {
+      background: linear-gradient(135deg, #92400e, #d97706);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(180,83,9,0.3);
+      padding: 13px 10px !important;
+      font-size: 13px !important;
+    }
+    .btn-folder-umum:hover { box-shadow: 0 7px 20px rgba(180,83,9,.4); }
+    .aksi-dl-note {
+      font-size: 11.5px; color: var(--abu); line-height: 1.6;
+      background: var(--krem); border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--krem2);
+    }
   </style>
 </head>
 <body>
@@ -995,7 +1008,7 @@
         </div>
       </div>
 
-      <!-- ═══ AKSI BAWAH: Download + Cetak ═══ -->
+      <!-- ═══ AKSI BAWAH: Folder Foto + Cetak ═══ -->
       <div class="aksi-bawah no-print">
 
         <!-- Keterangan -->
@@ -1004,13 +1017,25 @@
           <span>Pastikan Anda telah <strong>membuka semua tab foto</strong> (Qurban Anda &amp; Umum) sebelum cetak PDF agar semua foto termuat.</span>
         </div>
 
-        <!-- Tombol Download Semua Foto -->
-        <button class="btn-aksi btn-download" id="btn-download" onclick="downloadSemuaFoto()">
-          <span class="btn-aksi-text">⬇️ &nbsp;Download Semua Foto</span>
-          <span class="btn-aksi-spin">⏳ Mengunduh...</span>
-        </button>
-        <div class="download-progress"><div class="download-progress-bar"></div></div>
-        <div class="download-info"></div>
+        <!-- Label download -->
+        <div class="aksi-dl-label">📁 &nbsp;Download Foto via Google Drive</div>
+
+        <!-- 2 tombol folder -->
+        <div class="aksi-dl-row">
+          <button class="btn-aksi btn-folder-khusus" id="btn-download" onclick="bukaFolderFoto('khusus')">
+            <span class="btn-aksi-text">🔒 Foto Qurban Anda</span>
+            <span class="btn-aksi-spin">⏳</span>
+          </button>
+          <button class="btn-aksi btn-folder-umum" onclick="bukaFolderFoto('umum')">
+            <span class="btn-aksi-text">🌐 Foto Umum</span>
+            <span class="btn-aksi-spin">⏳</span>
+          </button>
+        </div>
+
+        <!-- Keterangan kecil -->
+        <div class="aksi-dl-note">
+          Akan membuka folder Google Drive → pilih foto → tap ⋮ → <strong>Download</strong>
+        </div>
 
         <!-- Tombol Cetak PDF -->
         <button class="btn-aksi btn-cetak" id="btn-cetak" onclick="cetakPDF()">
@@ -1419,79 +1444,35 @@
     window.bukaLightbox  = bukaLightbox;
     window.tutupLightbox = tutupLightbox;
     window.navLightbox   = navLightbox;
-    window.cetakPDF           = cetakPDF;
-    window.downloadSemuaFoto  = downloadSemuaFoto;
+    window.cetakPDF       = cetakPDF;
+    window.bukaFolderFoto = bukaFolderFoto;
 
-    // ══ DOWNLOAD SEMUA FOTO ══
-    async function downloadSemuaFoto() {
-      if (semuaDokumentasi.length === 0) {
-        showToast('Tidak ada foto untuk diunduh');
-        return;
-      }
+    // ══ FOLDER FOTO — buka link folder Google Drive ══
+    let linkFolderCache = null;
 
-      const btn      = document.getElementById('btn-download');
-      const progWrap = document.querySelector('.download-progress');
-      const progBar  = document.querySelector('.download-progress-bar');
-      const progInfo = document.querySelector('.download-info');
-
-      btn.classList.add('loading');
-      progWrap.classList.add('tampil');
-      progInfo.classList.add('tampil');
-
-      const namaSQ   = (akunSQ && akunSQ.nama_pemilik) ? akunSQ.nama_pemilik : 'Qurban';
-      const semuaFoto = semuaDokumentasi.filter(d => d.file_id);
-      const total    = semuaFoto.length;
-      let berhasil   = 0;
-      let gagal      = 0;
-
-      for (let i = 0; i < total; i++) {
-        const f   = semuaFoto[i];
-        const tipe = f.tipe === 'khusus' ? 'Khusus' : 'Umum';
-        const kat  = f.kategori || 'foto';
-        const no   = String(i + 1).padStart(3, '0');
-        const nama = namaSQ.replace(/[^a-zA-Z0-9]/g, '_');
-        const filename = no + '_' + tipe + '_' + kat + '_' + nama + '.jpg';
-
-        // Update progress
-        const pct = Math.round((i / total) * 100);
-        progBar.style.width = pct + '%';
-        progInfo.textContent = 'Mengunduh foto ' + (i + 1) + ' / ' + total + '...';
-
-        try {
-          // Gunakan thumbnail URL lalu fetch sebagai blob
-          const url = 'https://drive.google.com/thumbnail?id=' + f.file_id + '&sz=w1200';
-          const res = await fetch(url, { mode: 'cors' });
-          if (!res.ok) throw new Error('Fetch gagal');
-          const blob = await res.blob();
-          const objUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = objUrl;
-          a.download = filename;
-          a.click();
-          URL.revokeObjectURL(objUrl);
-          berhasil++;
-          // Jeda kecil agar browser tidak throttle
-          await new Promise(r => setTimeout(r, 400));
-        } catch(e) {
-          gagal++;
-          // Fallback: buka di tab baru jika CORS gagal
-          window.open('https://drive.google.com/file/d/' + f.file_id + '/view', '_blank');
-          await new Promise(r => setTimeout(r, 600));
+    async function bukaFolderFoto(tipe) {
+      const btns = document.querySelectorAll('.btn-folder-khusus, .btn-folder-umum');
+      btns.forEach(b => b.classList.add('loading'));
+      try {
+        if (!linkFolderCache) {
+          linkFolderCache = await callAPI('getFolderDokumentasi', { shohibul_id: akunSQ ? akunSQ.id : '' });
         }
+        const url = tipe === 'khusus'
+          ? (linkFolderCache.folder_khusus || linkFolderCache.folder_utama)
+          : (linkFolderCache.folder_umum   || linkFolderCache.folder_utama);
+        if (url) {
+          window.open(url, '_blank');
+        } else {
+          showToast('Folder belum tersedia. Hubungi panitia.');
+        }
+      } catch(e) {
+        showToast('Gagal membuka folder. Coba lagi.');
+      } finally {
+        btns.forEach(b => b.classList.remove('loading'));
       }
-
-      progBar.style.width = '100%';
-      progInfo.textContent = '✅ Selesai! ' + berhasil + ' foto berhasil' + (gagal > 0 ? ', ' + gagal + ' dibuka di tab baru' : '');
-
-      setTimeout(() => {
-        btn.classList.remove('loading');
-        progWrap.classList.remove('tampil');
-        progInfo.classList.remove('tampil');
-        progBar.style.width = '0%';
-      }, 3500);
-
-      showToast('✅ ' + berhasil + '/' + total + ' foto diunduh!');
     }
+
+
   });
   </script>
 </body>
