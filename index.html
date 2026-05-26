@@ -742,6 +742,89 @@
     .print-footer  { display: none; }
     .only-print    { display: none; }
     .galeri-semua-print { display: none; }
+
+    /* ══ AKSI BAWAH: Download + Cetak ══ */
+    .aksi-bawah {
+      padding: 0 16px 32px;
+      max-width: 640px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .aksi-keterangan {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12.5px; color: #78350f; line-height: 1.6;
+    }
+    .aksi-ket-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+
+    /* Tombol aksi generik */
+    .btn-aksi {
+      width: 100%; padding: 15px;
+      border: none; border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.3px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: transform .15s, box-shadow .15s;
+      position: relative; overflow: hidden;
+    }
+    .btn-aksi::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
+      pointer-events: none;
+    }
+    .btn-aksi:hover  { transform: translateY(-2px); }
+    .btn-aksi:active { transform: translateY(0); }
+    .btn-aksi.loading .btn-aksi-text  { display: none; }
+    .btn-aksi.loading .btn-aksi-spin  { display: flex; align-items: center; gap: 6px; }
+    .btn-aksi-spin { display: none; }
+
+    /* Download — biru */
+    .btn-download {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(37,99,235,0.35);
+    }
+    .btn-download:hover { box-shadow: 0 8px 24px rgba(37,99,235,0.45); }
+
+    /* Cetak — hijau (override lama) */
+    .btn-cetak {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, #1a5c38, #2d8a55);
+      color: #fff; border: none; border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.3px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 16px rgba(26,92,56,0.3);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-cetak:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,92,56,.4); }
+    .btn-cetak:active { transform: translateY(0); }
+    .btn-cetak.loading .btn-cetak-text    { display: none; }
+    .btn-cetak.loading .btn-cetak-spinner { display: flex; align-items: center; gap: 6px; }
+    .btn-cetak-spinner { display: none; }
+
+    /* Progress bar download */
+    .download-progress {
+      background: #f1f5f9; border-radius: 10px;
+      overflow: hidden; height: 6px; margin-top: 4px;
+      display: none;
+    }
+    .download-progress.tampil { display: block; }
+    .download-progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .download-info {
+      font-size: 11px; color: var(--abu); text-align: center;
+      display: none; margin-top: 4px;
+    }
+    .download-info.tampil { display: block; }
   </style>
 </head>
 <body>
@@ -841,14 +924,6 @@
       <div class="hero-sub">Berikut laporan &amp; dokumentasi qurban Anda</div>
     </div>
 
-    <!-- Tombol Cetak PDF -->
-    <div class="btn-cetak-wrap no-print">
-      <button class="btn-cetak" id="btn-cetak" onclick="cetakPDF()">
-        <span class="btn-cetak-text">🖨️ &nbsp;Cetak / Simpan PDF Laporan Qurban</span>
-        <span class="btn-cetak-spinner">⏳ Menyiapkan PDF...</span>
-      </button>
-    </div>
-
     <div class="main">
 
       <!-- STATUS QURBAN -->
@@ -918,6 +993,31 @@
           <div class="footer-arab">&#x631;&#x628;&#x651;&#x646;&#x627; &#x62A;&#x642;&#x628;&#x651;&#x644;&#x652; &#x645;&#x650;&#x646;&#x651;&#x627;</div>
           <div class="footer-trans">Semoga Allah terima Ibadah Qurban ini</div>
         </div>
+      </div>
+
+      <!-- ═══ AKSI BAWAH: Download + Cetak ═══ -->
+      <div class="aksi-bawah no-print">
+
+        <!-- Keterangan -->
+        <div class="aksi-keterangan">
+          <span class="aksi-ket-icon">⚠️</span>
+          <span>Pastikan Anda telah <strong>membuka semua tab foto</strong> (Qurban Anda &amp; Umum) sebelum cetak PDF agar semua foto termuat.</span>
+        </div>
+
+        <!-- Tombol Download Semua Foto -->
+        <button class="btn-aksi btn-download" id="btn-download" onclick="downloadSemuaFoto()">
+          <span class="btn-aksi-text">⬇️ &nbsp;Download Semua Foto</span>
+          <span class="btn-aksi-spin">⏳ Mengunduh...</span>
+        </button>
+        <div class="download-progress"><div class="download-progress-bar"></div></div>
+        <div class="download-info"></div>
+
+        <!-- Tombol Cetak PDF -->
+        <button class="btn-aksi btn-cetak" id="btn-cetak" onclick="cetakPDF()">
+          <span class="btn-cetak-text">🖨️ &nbsp;Cetak / Simpan PDF Laporan Qurban</span>
+          <span class="btn-cetak-spinner">⏳ Menyiapkan PDF...</span>
+        </button>
+
       </div>
 
     </div>
@@ -1319,7 +1419,79 @@
     window.bukaLightbox  = bukaLightbox;
     window.tutupLightbox = tutupLightbox;
     window.navLightbox   = navLightbox;
-    window.cetakPDF      = cetakPDF;
+    window.cetakPDF           = cetakPDF;
+    window.downloadSemuaFoto  = downloadSemuaFoto;
+
+    // ══ DOWNLOAD SEMUA FOTO ══
+    async function downloadSemuaFoto() {
+      if (semuaDokumentasi.length === 0) {
+        showToast('Tidak ada foto untuk diunduh');
+        return;
+      }
+
+      const btn      = document.getElementById('btn-download');
+      const progWrap = document.querySelector('.download-progress');
+      const progBar  = document.querySelector('.download-progress-bar');
+      const progInfo = document.querySelector('.download-info');
+
+      btn.classList.add('loading');
+      progWrap.classList.add('tampil');
+      progInfo.classList.add('tampil');
+
+      const namaSQ   = (akunSQ && akunSQ.nama_pemilik) ? akunSQ.nama_pemilik : 'Qurban';
+      const semuaFoto = semuaDokumentasi.filter(d => d.file_id);
+      const total    = semuaFoto.length;
+      let berhasil   = 0;
+      let gagal      = 0;
+
+      for (let i = 0; i < total; i++) {
+        const f   = semuaFoto[i];
+        const tipe = f.tipe === 'khusus' ? 'Khusus' : 'Umum';
+        const kat  = f.kategori || 'foto';
+        const no   = String(i + 1).padStart(3, '0');
+        const nama = namaSQ.replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = no + '_' + tipe + '_' + kat + '_' + nama + '.jpg';
+
+        // Update progress
+        const pct = Math.round((i / total) * 100);
+        progBar.style.width = pct + '%';
+        progInfo.textContent = 'Mengunduh foto ' + (i + 1) + ' / ' + total + '...';
+
+        try {
+          // Gunakan thumbnail URL lalu fetch sebagai blob
+          const url = 'https://drive.google.com/thumbnail?id=' + f.file_id + '&sz=w1200';
+          const res = await fetch(url, { mode: 'cors' });
+          if (!res.ok) throw new Error('Fetch gagal');
+          const blob = await res.blob();
+          const objUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = objUrl;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(objUrl);
+          berhasil++;
+          // Jeda kecil agar browser tidak throttle
+          await new Promise(r => setTimeout(r, 400));
+        } catch(e) {
+          gagal++;
+          // Fallback: buka di tab baru jika CORS gagal
+          window.open('https://drive.google.com/file/d/' + f.file_id + '/view', '_blank');
+          await new Promise(r => setTimeout(r, 600));
+        }
+      }
+
+      progBar.style.width = '100%';
+      progInfo.textContent = '✅ Selesai! ' + berhasil + ' foto berhasil' + (gagal > 0 ? ', ' + gagal + ' dibuka di tab baru' : '');
+
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        progWrap.classList.remove('tampil');
+        progInfo.classList.remove('tampil');
+        progBar.style.width = '0%';
+      }, 3500);
+
+      showToast('✅ ' + berhasil + '/' + total + ' foto diunduh!');
+    }
   });
   </script>
 </body>
